@@ -1,0 +1,72 @@
+CHEQUEO DE ACCESIBILIDAD — TA-TE-TI
+====================================
+
+Este chequeo usa axe-core (la librería de Deque, la misma que usan los
+equipos de accesibilidad profesionales) para detectar problemas de
+accesibilidad automáticamente: contraste de colores, roles ARIA,
+nombres accesibles, estructura de encabezados, etc.
+
+Solo LEE la página. No modifica ningún archivo del juego.
+
+REQUISITOS
+----------
+- Node.js instalado (ya lo tenés: v24).
+- Google Chrome o Microsoft Edge instalados (ya los tenés).
+
+PASOS
+-----
+1. Abrí PowerShell: presioná Win + R, escribí "powershell" y Enter.
+
+2. Ubicate en la carpeta del proyecto. Pegá y Enter:
+
+   Set-Location "C:\Workspace\Ta-Te-Ti"
+
+3. Instalá las dependencias (solo la primera vez). Pegá y Enter:
+
+   npm install @axe-core/playwright playwright
+
+   Esto crea una carpeta "node_modules" y un archivo "package.json"
+   dentro del proyecto. Son necesarios para correr el chequeo.
+
+4. Ejecutá el chequeo. Pegá y Enter:
+
+   node axe-check.js
+
+   Tarda entre 15 y 30 segundos. Abre Chrome en segundo plano, de
+   forma invisible (no vas a ver ninguna ventana). Después imprime
+   el resultado en pantalla.
+
+CÓMO LEER EL RESULTADO
+----------------------
+- Al final hay un bloque "RESUMEN" con 4 líneas: una por cada estado
+  analizado (tema claro, tema oscuro, diálogo, partida). Cada línea
+  dice cuántas "violaciones" y cuántos "incompletos" hay.
+
+- Cada violación muestra: impacto (crítico, serio, moderado, menor),
+  un ID técnico (ej. "color-contrast"), una regla en inglés, el
+  elemento que falla y el motivo.
+
+- Los "incompletos" son cosas que axe no pudo verificar del todo. No
+  son errores confirmados, pero conviene revisarlos.
+
+QUÉ HACER CON EL RESULTADO
+--------------------------
+Copiá todo lo que imprima (o al menos el RESUMEN y las violaciones) y
+pasáselo al asistente. Él lo interpreta y te dice qué arreglar.
+
+LIMPIAR DESPUÉS (opcional)
+--------------------------
+Si no querés dejar las dependencias en el proyecto, podés borrarlas
+así (esto NO borra el juego, solo lo que usa el chequeo):
+
+   Remove-Item node_modules -Recurse -Force
+   Remove-Item package.json -Force
+   Remove-Item package-lock.json -Force
+
+   Para volver a correr el chequeo después, repetí el paso 3.
+
+PROBLEMAS
+---------
+- Si al ejecutar sale un error que menciona "chrome", abrí el archivo
+  axe-check.js con Notepad, cambiá "channel: \"chrome\"" por
+  "channel: \"msedge\"", guardá y volvé a correr el paso 4.

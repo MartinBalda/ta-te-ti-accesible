@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ta-Te-Ti Accesible</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Aplica el tema guardado antes del primer render para evitar un
+    // destello de tema claro en usuarios que eligieron oscuro.
+    (function () {
+      try {
+        var tema = localStorage.getItem("ta-te-ti:tema");
+        if (tema === "oscuro" || tema === "claro") {
+          document.documentElement.dataset.tema = tema;
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#tablero">Saltar al tablero</a>
+
+  <header class="cabecera">
+    <h1>Ta-Te-Ti</h1>
+    <div class="acciones-cabecera">
+      <button type="button" id="btn-ayuda">Ayuda</button>
+      <button type="button" id="btn-sonido" aria-pressed="true">
+        <span id="sonido-label">Sonido: activado</span>
+      </button>
+      <button type="button" id="btn-tema" aria-pressed="false">
+        <span id="tema-label">Modo oscuro: desactivado</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Estado INICIO -->
+    <section id="panel-nivel" aria-labelledby="titulo-configuracion">
+      <h2 id="titulo-configuracion" class="sr-only">Configuración del torneo</h2>
+
+      <fieldset class="selector-nivel">
+        <legend>Nivel de dificultad</legend>
+        <div class="opciones-nivel">
+          <label>
+            <input type="radio" name="nivel" value="facil" checked />
+            Fácil
+          </label>
+          <label>
+            <input type="radio" name="nivel" value="medio" />
+            Medio
+          </label>
+          <label>
+            <input type="radio" name="nivel" value="imposible" />
+            Imposible
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="selector-partidas">
+        <legend>Partidas por torneo</legend>
+        <div class="campo">
+          <label for="cantidad-partidas">Cantidad de partidas</label>
+          <input type="number" id="cantidad-partidas" min="1" step="1" inputmode="numeric" pattern="[0-9]*" value="5" />
+        </div>
+        <label class="opcion-infinitas">
+          <input type="checkbox" id="sin-limite" />
+          <span>Infinitas (sin límite)</span>
+        </label>
+      </fieldset>
+
+      <button type="button" id="btn-iniciar">Iniciar torneo</button>
+    </section>
+
+    <!-- Tablero -->
+    <section id="tablero" aria-labelledby="titulo-tablero" tabindex="-1">
+      <h2 id="titulo-tablero" class="sr-only">Tablero</h2>
+      <div class="tablero-grid" role="application">
+        <button class="celda" data-index="0" tabindex="0" aria-label="Fila 1, columna 1, vacía" disabled></button>
+        <button class="celda" data-index="1" tabindex="-1" aria-label="Fila 1, columna 2, vacía" disabled></button>
+        <button class="celda" data-index="2" tabindex="-1" aria-label="Fila 1, columna 3, vacía" disabled></button>
+        <button class="celda" data-index="3" tabindex="-1" aria-label="Fila 2, columna 1, vacía" disabled></button>
+        <button class="celda" data-index="4" tabindex="-1" aria-label="Fila 2, columna 2, vacía" disabled></button>
+        <button class="celda" data-index="5" tabindex="-1" aria-label="Fila 2, columna 3, vacía" disabled></button>
+        <button class="celda" data-index="6" tabindex="-1" aria-label="Fila 3, columna 1, vacía" disabled></button>
+        <button class="celda" data-index="7" tabindex="-1" aria-label="Fila 3, columna 2, vacía" disabled></button>
+        <button class="celda" data-index="8" tabindex="-1" aria-label="Fila 3, columna 3, vacía" disabled></button>
+      </div>
+      <p id="estado-turno" class="estado-turno" aria-hidden="true"></p>
+    </section>
+
+    <!-- Puntuación -->
+    <section id="panel-puntuacion" aria-labelledby="titulo-puntuacion">
+      <h2 id="titulo-puntuacion" class="sr-only">Puntuación del torneo</h2>
+      <table class="puntuacion">
+        <caption>Puntuación del torneo</caption>
+        <thead>
+          <tr>
+            <th scope="col">Victorias</th>
+            <th scope="col">Derrotas</th>
+            <th scope="col">Empates</th>
+            <th scope="col">Partidas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td id="score-victorias">0</td>
+            <td id="score-derrotas">0</td>
+            <td id="score-empates">0</td>
+            <td id="score-partidas">0</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Estado JUGANDO -->
+    <section id="panel-jugando" hidden>
+      <button type="button" id="btn-siguiente" hidden>Siguiente partida</button>
+      <button type="button" id="btn-finalizar">Finalizar torneo</button>
+    </section>
+
+    <!-- Estado FINALIZADO -->
+    <section id="panel-finalizado" hidden>
+      <h2 class="sr-only">Resumen del torneo</h2>
+      <p id="resumen" tabindex="-1"></p>
+      <button type="button" id="btn-nuevo">Iniciar nuevo torneo</button>
+    </section>
+
+    <!-- Región viva de estado -->
+    <div id="anuncios" class="sr-only" role="status" aria-live="polite"></div>
+
+    <!-- Diálogo de ayuda -->
+    <div id="dialogo-ayuda" role="dialog" aria-modal="true" aria-labelledby="titulo-ayuda" tabindex="-1" hidden>
+      <div class="dialogo-ventana">
+        <h2 id="titulo-ayuda">Cómo se juega</h2>
+        <div id="contenido-ayuda">
+          <h3>Objetivo</h3>
+          <p>Forma tres en línea (fila, columna o diagonal) antes que la máquina. Tú juegas con <strong>X</strong> y mueves primero; la máquina juega con <strong>O</strong>.</p>
+
+          <h3>Reglas</h3>
+          <ol>
+            <li>Elige una celda vacía para colocar tu X.</li>
+            <li>La máquina responde con su O.</li>
+            <li>Gana quien primero alinea tres símbolos. Si el tablero se llena sin ganador, es empate.</li>
+          </ol>
+
+          <h3>Controles</h3>
+          <ul>
+            <li><strong>Ratón</strong>: haz clic en una celda vacía.</li>
+            <li><strong>Pantalla táctil (móvil)</strong>: toca una celda vacía.</li>
+            <li>
+              <strong>Teclado</strong>:
+              <ul>
+                <li><strong>Tab</strong>: entra al tablero y avanza al siguiente control.</li>
+                <li><strong>Flechas</strong>: mueven el foco entre las celdas del tablero.</li>
+                <li><strong>Enter o Espacio</strong>: coloca tu ficha en la celda enfocada.</li>
+                <li><strong>Esc</strong>: cierra esta ayuda.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h3>Niveles de dificultad</h3>
+          <ul>
+            <li><strong>Fácil</strong>: la máquina elige al azar. Ideal para empezar.</li>
+            <li><strong>Medio</strong>: la máquina bloquea tus jugadas y aprovecha las suyas.</li>
+            <li><strong>Imposible</strong>: la máquina juega perfecto; no pierde nunca.</li>
+          </ul>
+
+          <h3>Sonidos</h3>
+          <ul>
+            <li>Tono ascendente: ganaste.</li>
+            <li>Tono descendente: perdiste.</li>
+            <li>Tono neutro: empate.</li>
+            <li>Puedes silenciar todo con el botón "Sonido".</li>
+          </ul>
+
+          <h3>El torneo</h3>
+          <ul>
+            <li>Elige el nivel y cuántas partidas quieres jugar (o marca "Infinitas"), y presiona "Iniciar torneo".</li>
+            <li>La puntuación registra victorias, derrotas y empates.</li>
+            <li>El torneo termina al completar las partidas elegidas, o cuando presionas "Finalizar torneo".</li>
+          </ul>
+
+          <h3>Estrategia básica</h3>
+          <ol>
+            <li><strong>Juega al centro</strong> si está libre: es la casilla más fuerte, forma parte de 4 líneas.</li>
+            <li><strong>Las esquinas</strong> son el segundo mejor lugar: cada una forma parte de 3 líneas.</li>
+            <li><strong>Bloquea siempre</strong> la jugada ganadora de la máquina antes de atacar.</li>
+            <li><strong>Busca la doble amenaza (tenedor)</strong>: crea dos líneas a punto de ganar a la vez; la máquina solo podrá bloquear una.</li>
+            <li><strong>En nivel Imposible</strong>, tu mejor resultado es el empate: la máquina no comete errores.</li>
+          </ol>
+        </div>
+        <button type="button" id="btn-cerrar-ayuda">Cerrar</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

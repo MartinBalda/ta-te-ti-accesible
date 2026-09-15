@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ta-Te-Ti Accesible</title>
+  <style>
+/* Ta-Te-Ti accesible — presentación */
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --texto: #1b1b1b;
+  --x: #1d4ed8;
+  --o: #b91c1c;
+  --borde: #1b1b1b;
+  --fondo-suave: #f5f5f5;
+  --enfoque: #1d4ed8;
+  --destacado: #fde68a;
+  --destacado-intenso: #fcd34d;
+  --fondo-dialogo: rgba(27, 27, 27, 0.55);
+}
+
+/* Paleta oscura. Mantener sincronizada en los dos bloques:
+   - @media: aplica cuando el sistema está en oscuro y el usuario no eligió
+     tema manual (data-tema ausente en <html>);
+   - [data-tema="oscuro"]: preferencia manual del usuario.
+   Al declararse después, el bloque manual gana en caso de empate. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    color-scheme: dark;
+    --bg: #0f172a;
+    --texto: #e5e7eb;
+    --x: #93c5fd;
+    --o: #fca5a5;
+    --borde: #94a3b8;
+    --fondo-suave: #1e293b;
+    --enfoque: #93c5fd;
+    --destacado: rgba(252, 211, 77, 0.2);
+    --destacado-intenso: rgba(252, 211, 77, 0.4);
+    --fondo-dialogo: rgba(0, 0, 0, 0.65);
+  }
+}
+
+:root[data-tema="oscuro"] {
+  color-scheme: dark;
+  --bg: #0f172a;
+  --texto: #e5e7eb;
+  --x: #93c5fd;
+  --o: #fca5a5;
+  --borde: #94a3b8;
+  --fondo-suave: #1e293b;
+  --enfoque: #93c5fd;
+  --destacado: rgba(252, 211, 77, 0.2);
+  --destacado-intenso: rgba(252, 211, 77, 0.4);
+  --fondo-dialogo: rgba(0, 0, 0, 0.65);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* El atributo hidden debe prevalecer sobre cualquier display explícito
+   (display: flex en los paneles lo anularía sin esta regla) */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+/* Ocultamiento accesible: no usa display:none para no retirar del árbol de accesibilidad */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Enlace de salto, visible solo al recibir foco */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: var(--texto);
+  color: var(--bg);
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Foco visible con doble anillo para contraste 3:1 sobre cualquier fondo */
+:focus-visible {
+  outline: 3px solid var(--enfoque);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--bg);
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.cabecera h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.acciones-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+main {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+}
+
+button {
+  font: inherit;
+  color: var(--texto);
+  background: var(--bg);
+  border: 2px solid var(--borde);
+  border-radius: 6px;
+  padding: 0.75rem 1.25rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--fondo-suave);
+}
+
+/* Selector de nivel */
+.selector-nivel,
+.selector-partidas {
+  border: 2px solid var(--borde);
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 0 0 1rem;
+}
+
+.selector-nivel legend,
+.selector-partidas legend {
+  padding: 0 0.5rem;
+  font-weight: bold;
+}
+
+.opciones-nivel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.opciones-nivel label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid var(--borde);
+  border-radius: 6px;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.opciones-nivel input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.opciones-nivel input[type="radio"],
+.opcion-infinitas input[type="checkbox"] {
+  accent-color: var(--enfoque);
+}
+
+.campo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.campo input[type="number"] {
+  font: inherit;
+  color: var(--texto);
+  background: var(--bg);
+  padding: 0.5rem;
+  border: 2px solid var(--borde);
+  border-radius: 6px;
+  width: 5rem;
+  min-height: 44px;
+}
+
+.opcion-infinitas {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid var(--borde);
+  border-radius: 6px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.opcion-infinitas input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Tablero */
+#tablero {
+  margin: 1rem 0;
+}
+
+.tablero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  max-width: 22rem;
+  margin: 0 auto;
+}
+
+.celda {
+  aspect-ratio: 1 / 1;
+  min-height: 64px;
+  min-width: 64px;
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid var(--borde);
+  border-radius: 4px;
+  background: var(--bg);
+}
+
+.celda-x {
+  color: var(--x);
+}
+
+.celda-o {
+  color: var(--o);
+}
+
+.estado-turno {
+  min-height: 1.5rem;
+  margin: 0.75rem 0 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Puntuación */
+.puntuacion {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  width: 100%;
+  max-width: 22rem;
+}
+
+.puntuacion caption {
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.puntuacion th,
+.puntuacion td {
+  border: 1px solid var(--borde);
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.puntuacion th {
+  background: var(--fondo-suave);
+}
+
+/* Paneles de estado */
+#panel-jugando,
+#panel-finalizado {
+  margin: 1rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+#resumen {
+  font-weight: bold;
+  margin: 0 0 0.5rem;
+}
+
+/* Diálogo de ayuda */
+#dialogo-ayuda {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--fondo-dialogo);
+}
+
+.dialogo-ventana {
+  background: var(--bg);
+  border: 2px solid var(--borde);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  width: 100%;
+  max-width: 36rem;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.dialogo-ventana h2 {
+  margin: 0 0 0.5rem;
+}
+
+.dialogo-ventana h3 {
+  margin: 1rem 0 0.25rem;
+}
+
+.dialogo-ventana ul,
+.dialogo-ventana ol {
+  margin: 0.25rem 0 0.5rem;
+  padding-left: 1.25rem;
+}
+
+.dialogo-ventana p {
+  margin: 0.25rem 0;
+}
+
+#btn-cerrar-ayuda {
+  margin-top: 1rem;
+}
+
+/* Animaciones. Todas duran menos de 1 s (WCAG 2.2.2 no aplica) y se
+   desactivan por completo con prefers-reduced-motion en el bloque inferior. */
+.celda .simbolo {
+  display: inline-block;
+  animation: aparecer-ficha 0.15s ease-out;
+}
+
+@keyframes aparecer-ficha {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* La celda ganadora mantiene el fondo resaltado de forma persistente:
+   la animación es solo un pulso breve de refuerzo visual. */
+.celda-ganadora {
+  background-color: var(--destacado);
+  animation: pulso-ganador 0.3s ease-in-out 2;
+}
+
+@keyframes pulso-ganador {
+  50% {
+    background-color: var(--destacado-intenso);
+  }
+}
+
+.dialogo-ventana {
+  animation: aparecer-dialogo 0.18s ease-out;
+}
+
+@keyframes aparecer-dialogo {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Reflow a 320px */
+@media (max-width: 360px) {
+  .celda {
+    font-size: 1.5rem;
+  }
+}
+
+</style>
+  <script>
+    // Aplica el tema guardado antes del primer render para evitar un
+    // destello de tema claro en usuarios que eligieron oscuro.
+    (function () {
+      try {
+        var tema = localStorage.getItem("ta-te-ti:tema");
+        if (tema === "oscuro" || tema === "claro") {
+          document.documentElement.dataset.tema = tema;
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#tablero">Saltar al tablero</a>
+
+  <header class="cabecera">
+    <h1>Ta-Te-Ti</h1>
+    <div class="acciones-cabecera">
+      <button type="button" id="btn-ayuda">Ayuda</button>
+      <button type="button" id="btn-sonido" aria-pressed="true">
+        <span id="sonido-label">Sonido: activado</span>
+      </button>
+      <button type="button" id="btn-tema" aria-pressed="false">
+        <span id="tema-label">Modo oscuro: desactivado</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Estado INICIO -->
+    <section id="panel-nivel" aria-labelledby="titulo-configuracion">
+      <h2 id="titulo-configuracion" class="sr-only">Configuración del torneo</h2>
+
+      <fieldset class="selector-nivel">
+        <legend>Nivel de dificultad</legend>
+        <div class="opciones-nivel">
+          <label>
+            <input type="radio" name="nivel" value="facil" checked />
+            Fácil
+          </label>
+          <label>
+            <input type="radio" name="nivel" value="medio" />
+            Medio
+          </label>
+          <label>
+            <input type="radio" name="nivel" value="imposible" />
+            Imposible
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="selector-partidas">
+        <legend>Partidas por torneo</legend>
+        <div class="campo">
+          <label for="cantidad-partidas">Cantidad de partidas</label>
+          <input type="number" id="cantidad-partidas" min="1" step="1" inputmode="numeric" pattern="[0-9]*" value="5" />
+        </div>
+        <label class="opcion-infinitas">
+          <input type="checkbox" id="sin-limite" />
+          <span>Infinitas (sin límite)</span>
+        </label>
+      </fieldset>
+
+      <button type="button" id="btn-iniciar">Iniciar torneo</button>
+    </section>
+
+    <!-- Tablero -->
+    <section id="tablero" aria-labelledby="titulo-tablero" tabindex="-1">
+      <h2 id="titulo-tablero" class="sr-only">Tablero</h2>
+      <div class="tablero-grid" role="application">
+        <button class="celda" data-index="0" tabindex="0" aria-label="Fila 1, columna 1, vacía" disabled></button>
+        <button class="celda" data-index="1" tabindex="-1" aria-label="Fila 1, columna 2, vacía" disabled></button>
+        <button class="celda" data-index="2" tabindex="-1" aria-label="Fila 1, columna 3, vacía" disabled></button>
+        <button class="celda" data-index="3" tabindex="-1" aria-label="Fila 2, columna 1, vacía" disabled></button>
+        <button class="celda" data-index="4" tabindex="-1" aria-label="Fila 2, columna 2, vacía" disabled></button>
+        <button class="celda" data-index="5" tabindex="-1" aria-label="Fila 2, columna 3, vacía" disabled></button>
+        <button class="celda" data-index="6" tabindex="-1" aria-label="Fila 3, columna 1, vacía" disabled></button>
+        <button class="celda" data-index="7" tabindex="-1" aria-label="Fila 3, columna 2, vacía" disabled></button>
+        <button class="celda" data-index="8" tabindex="-1" aria-label="Fila 3, columna 3, vacía" disabled></button>
+      </div>
+      <p id="estado-turno" class="estado-turno" aria-hidden="true"></p>
+    </section>
+
+    <!-- Puntuación -->
+    <section id="panel-puntuacion" aria-labelledby="titulo-puntuacion">
+      <h2 id="titulo-puntuacion" class="sr-only">Puntuación del torneo</h2>
+      <table class="puntuacion">
+        <caption>Puntuación del torneo</caption>
+        <thead>
+          <tr>
+            <th scope="col">Victorias</th>
+            <th scope="col">Derrotas</th>
+            <th scope="col">Empates</th>
+            <th scope="col">Partidas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td id="score-victorias">0</td>
+            <td id="score-derrotas">0</td>
+            <td id="score-empates">0</td>
+            <td id="score-partidas">0</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Estado JUGANDO -->
+    <section id="panel-jugando" hidden>
+      <button type="button" id="btn-siguiente" hidden>Siguiente partida</button>
+      <button type="button" id="btn-finalizar">Finalizar torneo</button>
+    </section>
+
+    <!-- Estado FINALIZADO -->
+    <section id="panel-finalizado" hidden>
+      <h2 class="sr-only">Resumen del torneo</h2>
+      <p id="resumen" tabindex="-1"></p>
+      <button type="button" id="btn-nuevo">Iniciar nuevo torneo</button>
+    </section>
+
+    <!-- Región viva de estado -->
+    <div id="anuncios" class="sr-only" role="status" aria-live="polite"></div>
+
+    <!-- Diálogo de ayuda -->
+    <div id="dialogo-ayuda" role="dialog" aria-modal="true" aria-labelledby="titulo-ayuda" tabindex="-1" hidden>
+      <div class="dialogo-ventana">
+        <h2 id="titulo-ayuda">Cómo se juega</h2>
+        <div id="contenido-ayuda">
+          <h3>Objetivo</h3>
+          <p>Forma tres en línea (fila, columna o diagonal) antes que la máquina. Tú juegas con <strong>X</strong> y mueves primero; la máquina juega con <strong>O</strong>.</p>
+
+          <h3>Reglas</h3>
+          <ol>
+            <li>Elige una celda vacía para colocar tu X.</li>
+            <li>La máquina responde con su O.</li>
+            <li>Gana quien primero alinea tres símbolos. Si el tablero se llena sin ganador, es empate.</li>
+          </ol>
+
+          <h3>Controles</h3>
+          <ul>
+            <li><strong>Ratón</strong>: haz clic en una celda vacía.</li>
+            <li><strong>Pantalla táctil (móvil)</strong>: toca una celda vacía.</li>
+            <li>
+              <strong>Teclado</strong>:
+              <ul>
+                <li><strong>Tab</strong>: entra al tablero y avanza al siguiente control.</li>
+                <li><strong>Flechas</strong>: mueven el foco entre las celdas del tablero.</li>
+                <li><strong>Enter o Espacio</strong>: coloca tu ficha en la celda enfocada.</li>
+                <li><strong>Esc</strong>: cierra esta ayuda.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h3>Niveles de dificultad</h3>
+          <ul>
+            <li><strong>Fácil</strong>: la máquina elige al azar. Ideal para empezar.</li>
+            <li><strong>Medio</strong>: la máquina bloquea tus jugadas y aprovecha las suyas.</li>
+            <li><strong>Imposible</strong>: la máquina juega perfecto; no pierde nunca.</li>
+          </ul>
+
+          <h3>Sonidos</h3>
+          <ul>
+            <li>Tono ascendente: ganaste.</li>
+            <li>Tono descendente: perdiste.</li>
+            <li>Tono neutro: empate.</li>
+            <li>Puedes silenciar todo con el botón "Sonido".</li>
+          </ul>
+
+          <h3>El torneo</h3>
+          <ul>
+            <li>Elige el nivel y cuántas partidas quieres jugar (o marca "Infinitas"), y presiona "Iniciar torneo".</li>
+            <li>La puntuación registra victorias, derrotas y empates.</li>
+            <li>El torneo termina al completar las partidas elegidas, o cuando presionas "Finalizar torneo".</li>
+          </ul>
+
+          <h3>Estrategia básica</h3>
+          <ol>
+            <li><strong>Juega al centro</strong> si está libre: es la casilla más fuerte, forma parte de 4 líneas.</li>
+            <li><strong>Las esquinas</strong> son el segundo mejor lugar: cada una forma parte de 3 líneas.</li>
+            <li><strong>Bloquea siempre</strong> la jugada ganadora de la máquina antes de atacar.</li>
+            <li><strong>Busca la doble amenaza (tenedor)</strong>: crea dos líneas a punto de ganar a la vez; la máquina solo podrá bloquear una.</li>
+            <li><strong>En nivel Imposible</strong>, tu mejor resultado es el empate: la máquina no comete errores.</li>
+          </ol>
+        </div>
+        <button type="button" id="btn-cerrar-ayuda">Cerrar</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+/* Ta-Te-Ti accesible — lógica de juego, IA, gestión de foco y anuncios */
+
+// ---------- Referencias al DOM ----------
+const celdas = Array.from(document.querySelectorAll(".celda"));
+const tableroGrid = document.querySelector(".tablero-grid");
+const panelNivel = document.getElementById("panel-nivel");
+const panelJugando = document.getElementById("panel-jugando");
+const panelFinalizado = document.getElementById("panel-finalizado");
+const btnIniciar = document.getElementById("btn-iniciar");
+const btnSiguiente = document.getElementById("btn-siguiente");
+const btnFinalizar = document.getElementById("btn-finalizar");
+const btnNuevo = document.getElementById("btn-nuevo");
+const btnSonido = document.getElementById("btn-sonido");
+const sonidoLabel = document.getElementById("sonido-label");
+const btnTema = document.getElementById("btn-tema");
+const temaLabel = document.getElementById("tema-label");
+const anuncios = document.getElementById("anuncios");
+const estadoTurno = document.getElementById("estado-turno");
+const resumen = document.getElementById("resumen");
+const panelPuntuacion = document.getElementById("panel-puntuacion");
+const btnAyuda = document.getElementById("btn-ayuda");
+const btnCerrarAyuda = document.getElementById("btn-cerrar-ayuda");
+const dialogoAyuda = document.getElementById("dialogo-ayuda");
+const inputCantidad = document.getElementById("cantidad-partidas");
+const checkboxSinLimite = document.getElementById("sin-limite");
+const scoreVictorias = document.getElementById("score-victorias");
+const scoreDerrotas = document.getElementById("score-derrotas");
+const scoreEmpates = document.getElementById("score-empates");
+const scorePartidas = document.getElementById("score-partidas");
+
+// ---------- Constantes ----------
+const LINEAS = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8], // filas
+  [0, 3, 6], [1, 4, 7], [2, 5, 8], // columnas
+  [0, 4, 8], [2, 4, 6],            // diagonales
+];
+
+const NIVEL_TEXTO = { facil: "Fácil", medio: "Medio", imposible: "Imposible" };
+
+// ---------- Estado ----------
+let fase = "inicio"; // "inicio" | "jugando" | "finalizado"
+let nivel = "facil";
+let tablero = Array(9).fill(null); // null | "X" | "O"
+let marcador = { victorias: 0, derrotas: 0, empates: 0, partidas: 0 };
+let esTurnoMaquina = false;
+let juegoTerminado = false;
+let celdaActiva = 0;
+let limitePartidas = Infinity; // Infinity = torneo sin límite
+let disparadorAyuda = null; // elemento que abrió el diálogo de ayuda
+
+// ---------- Sonido (Web Audio) ----------
+let audioCtx = null;
+let sonidoActivo = true;
+
+function asegurarAudio() {
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    audioCtx = new Ctx();
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}
+
+function tocarTonos(frecuencias, duracion) {
+  if (!sonidoActivo || !audioCtx) return;
+  const inicioBase = audioCtx.currentTime;
+  frecuencias.forEach((frecuencia, i) => {
+    const osc = audioCtx.createOscillator();
+    const ganancia = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = frecuencia;
+
+    const inicio = inicioBase + i * duracion;
+    const fin = inicio + duracion;
+    ganancia.gain.setValueAtTime(0.0001, inicio);
+    ganancia.gain.exponentialRampToValueAtTime(0.3, inicio + 0.02);
+    ganancia.gain.exponentialRampToValueAtTime(0.0001, fin);
+
+    osc.connect(ganancia);
+    ganancia.connect(audioCtx.destination);
+    osc.start(inicio);
+    osc.stop(fin + 0.02);
+  });
+}
+
+function sonarExito() {
+  tocarTonos([523.25, 659.25, 783.99], 0.15); // C5, E5, G5 ascendente
+}
+
+function sonarFracaso() {
+  tocarTonos([220.0, 174.61, 146.83], 0.18); // descendente grave
+}
+
+function sonarEmpate() {
+  tocarTonos([392.0, 392.0], 0.18); // dos tonos iguales, neutros
+}
+
+function actualizarBotonSonido() {
+  btnSonido.setAttribute("aria-pressed", String(sonidoActivo));
+  sonidoLabel.textContent = sonidoActivo ? "Sonido: activado" : "Sonido: silenciado";
+}
+
+function alternarSonido() {
+  sonidoActivo = !sonidoActivo;
+  try {
+    localStorage.setItem("ta-te-ti:sonido", sonidoActivo ? "on" : "off");
+  } catch (e) {
+    // Almacenamiento no disponible: el sonido aplica igual durante la sesión.
+  }
+  actualizarBotonSonido();
+  anunciar(sonidoActivo ? "Sonido activado." : "Sonido silenciado.");
+}
+
+// ---------- Tema (claro / oscuro) ----------
+function temaOscuroActivo() {
+  const tema = document.documentElement.dataset.tema;
+  if (tema === "oscuro") return true;
+  if (tema === "claro") return false;
+  // Sin preferencia guardada: sigue al sistema.
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function actualizarBotonTema() {
+  const oscuro = temaOscuroActivo();
+  btnTema.setAttribute("aria-pressed", String(oscuro));
+  temaLabel.textContent = oscuro ? "Modo oscuro: activado" : "Modo oscuro: desactivado";
+}
+
+function alternarTema() {
+  const oscuro = temaOscuroActivo();
+  const nuevo = oscuro ? "claro" : "oscuro";
+  document.documentElement.dataset.tema = nuevo;
+  try {
+    localStorage.setItem("ta-te-ti:tema", nuevo);
+  } catch (e) {
+    // Almacenamiento no disponible: el tema aplica igual durante la sesión.
+  }
+  actualizarBotonTema();
+  anunciar(oscuro ? "Modo oscuro desactivado." : "Modo oscuro activado.");
+}
+
+// ---------- Utilidades ----------
+function posicionNombre(i) {
+  const fila = Math.floor(i / 3) + 1;
+  const col = (i % 3) + 1;
+  return "fila " + fila + ", columna " + col;
+}
+
+function etiquetaCelda(i, contenido) {
+  const pos = posicionNombre(i);
+  const posCapitalizada = pos.charAt(0).toUpperCase() + pos.slice(1);
+  return posCapitalizada + ", " + contenido;
+}
+
+function celdasVacias() {
+  return tablero.reduce((acc, valor, i) => (valor === null ? acc.concat(i) : acc), []);
+}
+
+function hayGanador() {
+  for (const linea of LINEAS) {
+    const [a, b, c] = linea;
+    if (tablero[a] && tablero[a] === tablero[b] && tablero[a] === tablero[c]) {
+      return tablero[a];
+    }
+  }
+  return null;
+}
+
+function obtenerLineaGanadora() {
+  for (const linea of LINEAS) {
+    const [a, b, c] = linea;
+    if (tablero[a] && tablero[a] === tablero[b] && tablero[a] === tablero[c]) {
+      return linea;
+    }
+  }
+  return null;
+}
+
+function nivelTexto() {
+  return NIVEL_TEXTO[nivel];
+}
+
+function textoMarcador() {
+  return (
+    marcador.victorias +
+    " victorias, " +
+    marcador.derrotas +
+    " derrotas, " +
+    marcador.empates +
+    " empates"
+  );
+}
+
+function textoResumen() {
+  return (
+    "Jugaste " +
+    marcador.partidas +
+    " partidas: " +
+    marcador.victorias +
+    " victorias, " +
+    marcador.derrotas +
+    " derrotas, " +
+    marcador.empates +
+    " empates"
+  );
+}
+
+function leerLimitePartidas() {
+  if (checkboxSinLimite.checked) return Infinity;
+  const valor = Number(inputCantidad.value);
+  if (Number.isFinite(valor) && valor >= 1) return Math.floor(valor);
+  return 5; // valor por defecto si el campo está vacío o es inválido
+}
+
+function textoInicioTorneo() {
+  const base = "Torneo iniciado en nivel " + nivelTexto() + ".";
+  if (limitePartidas === Infinity) return base + " Tu turno.";
+  return base + " Partida 1 de " + limitePartidas + ". Tu turno.";
+}
+
+function textoNuevaPartida() {
+  if (limitePartidas === Infinity) return "Nueva partida. Tu turno.";
+  return "Partida " + (marcador.partidas + 1) + " de " + limitePartidas + ". Tu turno.";
+}
+
+// ---------- IA ----------
+function jugadaAleatoria() {
+  const vacias = celdasVacias();
+  return vacias[Math.floor(Math.random() * vacias.length)];
+}
+
+function buscarJugadaGanadora(simbolo) {
+  for (const i of celdasVacias()) {
+    tablero[i] = simbolo;
+    const gana = hayGanador() === simbolo;
+    tablero[i] = null;
+    if (gana) return i;
+  }
+  return null;
+}
+
+function jugadaMedio() {
+  // 1. ganar si puede
+  const ganadora = buscarJugadaGanadora("O");
+  if (ganadora !== null) return ganadora;
+  // 2. bloquear si el jugador puede ganar
+  const bloqueo = buscarJugadaGanadora("X");
+  if (bloqueo !== null) return bloqueo;
+  // 3. al azar
+  return jugadaAleatoria();
+}
+
+function minimax(profundidad, esMaximizador, alfa, beta) {
+  const ganador = hayGanador();
+  if (ganador === "O") return 10 - profundidad; // gana la máquina
+  if (ganador === "X") return profundidad - 10; // gana el jugador
+  if (celdasVacias().length === 0) return 0; // empate
+
+  if (esMaximizador) {
+    let mejor = -Infinity;
+    for (const i of celdasVacias()) {
+      tablero[i] = "O";
+      mejor = Math.max(mejor, minimax(profundidad + 1, false, alfa, beta));
+      tablero[i] = null;
+      alfa = Math.max(alfa, mejor);
+      if (beta <= alfa) break;
+    }
+    return mejor;
+  } else {
+    let mejor = Infinity;
+    for (const i of celdasVacias()) {
+      tablero[i] = "X";
+      mejor = Math.min(mejor, minimax(profundidad + 1, true, alfa, beta));
+      tablero[i] = null;
+      beta = Math.min(beta, mejor);
+      if (beta <= alfa) break;
+    }
+    return mejor;
+  }
+}
+
+function jugadaImposible() {
+  let mejor = -Infinity;
+  let mejorMov = null;
+  for (const i of celdasVacias()) {
+    tablero[i] = "O";
+    const puntaje = minimax(0, false, -Infinity, Infinity);
+    tablero[i] = null;
+    if (puntaje > mejor) {
+      mejor = puntaje;
+      mejorMov = i;
+    }
+  }
+  return mejorMov;
+}
+
+function calcularJugadaMaquina() {
+  switch (nivel) {
+    case "facil":
+      return jugadaAleatoria();
+    case "medio":
+      return jugadaMedio();
+    case "imposible":
+      return jugadaImposible();
+  }
+}
+
+// ---------- Render del tablero ----------
+function limpiarTablero() {
+  tablero = Array(9).fill(null);
+  celdas.forEach((btn, i) => {
+    btn.textContent = "";
+    btn.classList.remove("celda-x", "celda-o", "celda-ganadora");
+    btn.setAttribute("aria-label", etiquetaCelda(i, "vacía"));
+  });
+}
+
+function colocar(i, simbolo) {
+  tablero[i] = simbolo;
+  const btn = celdas[i];
+  btn.innerHTML = "<span class=\"simbolo\">" + simbolo + "</span>";
+  btn.classList.add(simbolo === "X" ? "celda-x" : "celda-o");
+  btn.setAttribute("aria-label", etiquetaCelda(i, simbolo));
+}
+
+function actualizarCeldaActiva(i) {
+  celdaActiva = i;
+  celdas.forEach((btn, idx) => {
+    btn.tabIndex = idx === i ? 0 : -1;
+  });
+}
+
+function fijarFocoEn(i) {
+  actualizarCeldaActiva(i);
+  celdas[i].focus();
+}
+
+function setBoardDisabled(deshabilitado) {
+  celdas.forEach((btn) => {
+    btn.disabled = deshabilitado;
+  });
+}
+
+function actualizarPuntuacion() {
+  scoreVictorias.textContent = marcador.victorias;
+  scoreDerrotas.textContent = marcador.derrotas;
+  scoreEmpates.textContent = marcador.empates;
+  scorePartidas.textContent = marcador.partidas;
+}
+
+// ---------- Anuncios ----------
+function anunciar(mensaje) {
+  anuncios.textContent = "";
+  setTimeout(() => {
+    anuncios.textContent = mensaje;
+  }, 50);
+}
+
+function mostrarEstado(texto) {
+  estadoTurno.textContent = texto;
+}
+
+// ---------- Estados ----------
+function setFase(nueva) {
+  fase = nueva;
+  panelNivel.hidden = nueva !== "inicio";
+  panelJugando.hidden = nueva !== "jugando";
+  panelFinalizado.hidden = nueva !== "finalizado";
+  // En Finalizado la puntuación se oculta: el resumen ya muestra esos datos.
+  panelPuntuacion.hidden = nueva === "finalizado";
+}
+
+// ---------- Flujo del juego ----------
+function nivelSeleccionado() {
+  return document.querySelector('input[name="nivel"]:checked').value;
+}
+
+function iniciarTorneo() {
+  asegurarAudio();
+  nivel = nivelSeleccionado();
+  limitePartidas = leerLimitePartidas();
+  marcador = { victorias: 0, derrotas: 0, empates: 0, partidas: 0 };
+  esTurnoMaquina = false;
+  juegoTerminado = false;
+
+  actualizarPuntuacion();
+  limpiarTablero();
+  setFase("jugando");
+  setBoardDisabled(false);
+  btnSiguiente.hidden = true;
+
+  mostrarEstado("Tu turno");
+  anunciar(textoInicioTorneo());
+  fijarFocoEn(0);
+}
+
+function comprobarResultado() {
+  const ganador = hayGanador();
+  if (ganador === "X") return "victoria";
+  if (ganador === "O") return "derrota";
+  if (celdasVacias().length === 0) return "empate";
+  return null;
+}
+
+function terminarPartida(resultado, movMaquina) {
+  juegoTerminado = true;
+  esTurnoMaquina = false;
+  tableroGrid.removeAttribute("aria-busy");
+
+  // Resalta la línea ganadora (solo en victoria o derrota, no en empate).
+  if (resultado === "victoria" || resultado === "derrota") {
+    const linea = obtenerLineaGanadora();
+    if (linea) linea.forEach((i) => celdas[i].classList.add("celda-ganadora"));
+  }
+
+  marcador.partidas += 1;
+
+  // Si la máquina terminó la partida, su jugada y el resultado se anuncian juntos
+  // para que no se pisen dos anuncios consecutivos.
+  const prefijo =
+    movMaquina !== undefined
+      ? "La máquina jugó en " + posicionNombre(movMaquina) + ". "
+      : "";
+
+  if (resultado === "victoria") {
+    marcador.victorias += 1;
+    sonarExito();
+    mostrarEstado("¡Ganaste!");
+    anunciar("¡Ganaste! Marcador: " + textoMarcador() + ".");
+  } else if (resultado === "derrota") {
+    marcador.derrotas += 1;
+    sonarFracaso();
+    mostrarEstado("La máquina ganó");
+    anunciar(prefijo + "La máquina ganó. Marcador: " + textoMarcador() + ".");
+  } else {
+    marcador.empates += 1;
+    sonarEmpate();
+    mostrarEstado("Empate");
+    anunciar(prefijo + "Empate. Marcador: " + textoMarcador() + ".");
+  }
+
+  actualizarPuntuacion();
+
+  if (marcador.partidas >= limitePartidas) {
+    // Se completó el límite de partidas: el torneo se cierra solo.
+    setTimeout(() => {
+      if (fase === "jugando" && dialogoAyuda.hidden) {
+        finalizarTorneo(true);
+      }
+    }, 2000);
+  } else {
+    btnSiguiente.hidden = false;
+    // El foco se mueve después del anuncio del resultado, para no pisarlo.
+    setTimeout(() => {
+      if (fase === "jugando" && juegoTerminado) {
+        btnSiguiente.focus();
+      }
+    }, 1000);
+  }
+}
+
+function jugarJugador(i) {
+  if (fase !== "jugando" || esTurnoMaquina || juegoTerminado) return;
+  if (tablero[i] !== null) {
+    anunciar("Esa celda ya está ocupada. Elegí otra.");
+    return;
+  }
+
+  asegurarAudio();
+  colocar(i, "X");
+
+  const resultado = comprobarResultado();
+  if (resultado) {
+    terminarPartida(resultado);
+    return;
+  }
+
+  esTurnoMaquina = true;
+  tableroGrid.setAttribute("aria-busy", "true");
+  mostrarEstado("Turno de la máquina…");
+  anunciar("Turno de la máquina.");
+
+  setTimeout(() => {
+    if (fase !== "jugando") return; // el torneo se finalizó mientras la máquina pensaba
+
+    const mov = calcularJugadaMaquina();
+    colocar(mov, "O");
+    esTurnoMaquina = false;
+    tableroGrid.removeAttribute("aria-busy");
+
+    const resultadoMaquina = comprobarResultado();
+    if (resultadoMaquina) {
+      terminarPartida(resultadoMaquina, mov);
+    } else {
+      mostrarEstado("Tu turno");
+      anunciar("La máquina jugó en " + posicionNombre(mov) + ". Tu turno.");
+    }
+  }, 500);
+}
+
+function siguientePartida() {
+  asegurarAudio();
+  juegoTerminado = false;
+  esTurnoMaquina = false;
+
+  limpiarTablero();
+  mostrarEstado("Tu turno");
+  anunciar(textoNuevaPartida());
+
+  fijarFocoEn(0); // foco a la primera celda (índice 0)
+  btnSiguiente.hidden = true; // recién después se oculta el botón
+}
+
+function finalizarTorneo(completado) {
+  esTurnoMaquina = false;
+  juegoTerminado = true;
+  tableroGrid.removeAttribute("aria-busy");
+
+  setFase("finalizado");
+  setBoardDisabled(true);
+  btnSiguiente.hidden = true;
+
+  const prefijo = completado ? "Torneo completado." : "Torneo finalizado.";
+  const texto = textoResumen();
+  resumen.textContent = prefijo + " " + texto;
+  mostrarEstado("");
+
+  resumen.focus(); // el resumen recibe el foco y se anuncia al recibirlo
+}
+
+function nuevoTorneo() {
+  setFase("inicio");
+  marcador = { victorias: 0, derrotas: 0, empates: 0, partidas: 0 };
+  actualizarPuntuacion();
+  limpiarTablero();
+  setBoardDisabled(true);
+  mostrarEstado("");
+
+  document.querySelector('input[name="nivel"]:checked').focus();
+}
+
+// ---------- Diálogo de ayuda ----------
+function toggleSinLimite() {
+  inputCantidad.disabled = checkboxSinLimite.checked;
+}
+
+function abrirAyuda() {
+  disparadorAyuda = document.activeElement;
+  dialogoAyuda.hidden = false;
+  dialogoAyuda.focus();
+}
+
+function cerrarAyuda() {
+  dialogoAyuda.hidden = true;
+  if (disparadorAyuda) {
+    disparadorAyuda.focus();
+  }
+}
+
+// ---------- Eventos ----------
+celdas.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const i = Number(btn.dataset.index);
+    actualizarCeldaActiva(i); // sincroniza el roving tabindex con el clic del puntero
+    jugarJugador(i);
+  });
+});
+
+tableroGrid.addEventListener("keydown", (evento) => {
+  if (fase !== "jugando") return;
+
+  const idx = celdaActiva;
+  let nuevo = null;
+  switch (evento.key) {
+    case "ArrowLeft":
+      if (idx % 3 > 0) nuevo = idx - 1;
+      break;
+    case "ArrowRight":
+      if (idx % 3 < 2) nuevo = idx + 1;
+      break;
+    case "ArrowUp":
+      if (idx >= 3) nuevo = idx - 3;
+      break;
+    case "ArrowDown":
+      if (idx < 6) nuevo = idx + 3;
+      break;
+  }
+
+  if (nuevo !== null) {
+    evento.preventDefault();
+    fijarFocoEn(nuevo);
+  }
+});
+
+btnIniciar.addEventListener("click", iniciarTorneo);
+btnSiguiente.addEventListener("click", siguientePartida);
+btnFinalizar.addEventListener("click", () => finalizarTorneo());
+btnNuevo.addEventListener("click", nuevoTorneo);
+btnSonido.addEventListener("click", alternarSonido);
+btnTema.addEventListener("click", alternarTema);
+btnAyuda.addEventListener("click", abrirAyuda);
+btnCerrarAyuda.addEventListener("click", cerrarAyuda);
+checkboxSinLimite.addEventListener("change", toggleSinLimite);
+
+// Trampa de foco y cierre con Esc dentro del diálogo de ayuda
+dialogoAyuda.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape") {
+    evento.preventDefault();
+    cerrarAyuda();
+    return;
+  }
+  if (evento.key !== "Tab") return;
+
+  const focusables = dialogoAyuda.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusables.length === 0) return;
+
+  const primero = focusables[0];
+  const ultimo = focusables[focusables.length - 1];
+
+  if (evento.shiftKey && document.activeElement === primero) {
+    evento.preventDefault();
+    ultimo.focus();
+  } else if (!evento.shiftKey && document.activeElement === ultimo) {
+    evento.preventDefault();
+    primero.focus();
+  }
+});
+
+// Sigue al sistema mientras no haya preferencia manual guardada
+const mediaOscura = window.matchMedia("(prefers-color-scheme: dark)");
+mediaOscura.addEventListener("change", () => {
+  try {
+    if (localStorage.getItem("ta-te-ti:tema") === null) {
+      actualizarBotonTema();
+    }
+  } catch (e) {
+    // Almacenamiento no disponible: el botón ya refleja el estado actual.
+  }
+});
+
+// ---------- Inicialización ----------
+function init() {
+  setFase("inicio");
+  setBoardDisabled(true);
+
+  let pref = "on";
+  try {
+    pref = localStorage.getItem("ta-te-ti:sonido");
+  } catch (e) {
+    // Almacenamiento no disponible: se usa el valor por defecto (sonido activado).
+  }
+  sonidoActivo = pref !== "off";
+  actualizarBotonSonido();
+
+  actualizarBotonTema();
+}
+
+init();
+
+</script>
+</body>
+</html>
+
