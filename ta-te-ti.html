@@ -966,11 +966,15 @@ function actualizarPuntuacion() {
 }
 
 // ---------- Anuncios ----------
+let alternarAnuncio = false;
+
 function anunciar(mensaje) {
-  anuncios.textContent = "";
-  setTimeout(() => {
-    anuncios.textContent = mensaje;
-  }, 50);
+  alternarAnuncio = !alternarAnuncio;
+  // Alterna un espacio final (que el lector de pantalla no pronuncia) para
+  // forzar un cambio real en la región viva en cada anuncio, incluso cuando
+  // dos mensajes consecutivos son idénticos. Una única mutación es más
+  // fiable para VoiceOver que el patrón "limpiar y rellenar con setTimeout".
+  anuncios.textContent = alternarAnuncio ? mensaje + " " : mensaje;
 }
 
 function mostrarEstado(texto) {
@@ -1067,12 +1071,13 @@ function terminarPartida(resultado, movMaquina) {
     }, 2000);
   } else {
     btnSiguiente.hidden = false;
-    // El foco se mueve después del anuncio del resultado, para no pisarlo.
+    // El foco se mueve con un delay amplio: moverlo antes interrumpe a
+    // VoiceOver en pleno anuncio del resultado.
     setTimeout(() => {
       if (fase === "jugando" && juegoTerminado) {
         btnSiguiente.focus();
       }
-    }, 1000);
+    }, 2500);
   }
 }
 
