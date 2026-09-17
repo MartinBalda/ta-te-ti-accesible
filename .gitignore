@@ -3,3 +3,6 @@ node_modules/
 # Documentación de proceso: solo local, no se publica en el repo
 design.md
 spec.md
+
+# Directorio de tooling (índice de skills de gentle-ai)
+.atl/
