@@ -413,3 +413,22 @@ button:hover {
     font-size: 1.5rem;
   }
 }
+
+/* Enlaces y pie de página */
+a {
+  color: var(--enfoque);
+  text-decoration: underline;
+}
+
+.pie {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2rem;
+  border-top: 2px solid var(--borde);
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.pie p {
+  margin: 0;
+}
